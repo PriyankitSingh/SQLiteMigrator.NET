@@ -6,13 +6,13 @@ namespace SqliteDatabaseInstaller;
 public class SqliteMigrator
 {
     private readonly string _connectionString;
-    private readonly string _migrationFolder = "./Migrations";
+    private readonly string _migrationFolder = "Migrations";
     
     public SqliteMigrator(string databaseName, string? migrationFolder = null)
     {
         _connectionString = $"Data Source={databaseName}";
         _migrationFolder = migrationFolder ?? _migrationFolder;
-        Console.WriteLine($"Migration folder: {_migrationFolder}");
+        Console.WriteLine($"Migration folder {_migrationFolder}");
         // Ensure database file exists
         if (!File.Exists(databaseName))
         {
