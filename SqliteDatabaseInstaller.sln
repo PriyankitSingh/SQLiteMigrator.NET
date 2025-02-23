@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SqliteDatabaseInstaller", "SqliteDatabaseInstaller\SqliteDatabaseInstaller.csproj", "{DCB39533-DCD1-422E-AC3A-5C699F4D6830}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Example.Console", "Example\Example.Console\Example.Console.csproj", "{046CCD9B-DCEB-414B-99DA-8C147A12FC7B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DCB39533-DCD1-422E-AC3A-5C699F4D6830}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DCB39533-DCD1-422E-AC3A-5C699F4D6830}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DCB39533-DCD1-422E-AC3A-5C699F4D6830}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DCB39533-DCD1-422E-AC3A-5C699F4D6830}.Release|Any CPU.Build.0 = Release|Any CPU
+		{046CCD9B-DCEB-414B-99DA-8C147A12FC7B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{046CCD9B-DCEB-414B-99DA-8C147A12FC7B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{046CCD9B-DCEB-414B-99DA-8C147A12FC7B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{046CCD9B-DCEB-414B-99DA-8C147A12FC7B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
