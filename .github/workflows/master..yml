@@ -6,73 +6,41 @@ on:
       
 jobs:
   build:
-    runs-on: ubuntu-latest    
-    outputs: 
-      Version: ${{ steps.gitversion.outputs.SemVer }}
-      CommitsSinceVersionSource: ${{ steps.gitversion.outputs.CommitsSinceVersionSource }} 
+
+    name: publish-release
+    runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - name: Checkout
+      uses: actions/checkout@v2
+      
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v3.0.3
       with:
-        fetch-depth: 0 #fetch-depth is needed for GitVersion
-        
-    #Install and calculate the new version with GitVersion  
-    - name: Install GitVersion
-      uses: gittools/actions/gitversion/setup@v0.9.7
-      with:
-        versionSpec: 5.x
-    - name: Determine Version
-      uses: gittools/actions/gitversion/execute@v0.9.7
-      id: gitversion # step id used as reference for output values
-    - name: Display GitVersion outputs
-      run: |
-        echo "Version: ${{ steps.gitversion.outputs.SemVer }}"
-        echo "CommitsSinceVersionSource: ${{ steps.gitversion.outputs.CommitsSinceVersionSource }}"
-    
-    #Build/pack the project
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: 6.0.x
-    - name: Build and Pack NuGet package
-      run: dotnet pack SqlitedatabaseInstaller/SqlitedatabaseInstaller.csproj -p:Version='${{ steps.gitversion.outputs.SemVer }}' -c Release
-    - name: Upload NuGet package to GitHub
-      uses: actions/upload-artifact@v4
-      with:
-        name: nugetPackage
-        path: bin/Release/ 
-        
-  release:
-    runs-on: ubuntu-latest    
-    needs: build
-    if: github.ref == 'refs/heads/master' # only run job if on the master branch   
-    
-    steps:  
-    #Push NuGet package to GitHub packages
-    - name: Download nuget package artifact
-      uses: actions/download-artifact@v1.0.0
-      with:
-        name: nugetPackage
-    - name: Prep packages
-      run: dotnet nuget add source --username PriyankitSingh --password ${{ secrets.NUGET_PACKAGE_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/PriyankitSingh/index.json"
-    - name: Push package to GitHub packages 
-      if: needs.build.outputs.CommitsSinceVersionSource > 0 #Only release if there has been a commit/version change  
-      run: dotnet nuget push nugetPackage/*.nupkg --api-key ${{ secrets.NUGET_PACKAGE_TOKEN }}  --source "github"
-    
-    #Create release
-    - name: Create Release
-      if: 1 == 0 #needs.build.outputs.CommitsSinceVersionSource > 0 #Only release if there has been a commit/version change
-      uses: actions/create-release@v1
+        dotnet-version: 8.0.0
+        # Authenticates packages to push to GPR
+        source-url: https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
       env:
-        GITHUB_TOKEN: ${{ secrets.NUGET_PACKAGE_TOKEN }} 
-      with:
-        tag_name: ${{ needs.build.outputs.Version }}
-        release_name: Release ${{ needs.build.outputs.Version }}
-    - name: Create Release
-      if: needs.build.outputs.CommitsSinceVersionSource > 0 #Only release if there has been a commit/version change
-      uses: ncipollo/release-action@v1
-      with:
-        tag: ${{ needs.build.outputs.Version }}
-        name: Release ${{ needs.build.outputs.Version }}
-        artifacts: "nugetPackage/*"
-        token: ${{ secrets.NUGET_PACKAGE_TOKEN }}
+        NUGET_AUTH_TOKEN: ${{ secrets.NUGET_PACKAGE_TOKEN }}
+    
+    - name: Install dependencies
+      run: dotnet restore
+      env:
+        NUGET_AUTH_TOKEN: ${{ secrets.NUGET_PACKAGE_TOKEN }}
+        
+    - name: Build
+      run: dotnet build --configuration Release --no-restore
+      
+    - name: Test
+      run: dotnet test --no-restore --verbosity normal
+      
+    - name: Pack
+      run: dotnet pack --no-build --configuration Release
+      
+    - name: PushNuget
+      run: dotnet nuget push **/*.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.PUBLISH_TO_NUGET_ORG }} --skip-duplicate
+      
+    - name: PushGithub
+      run: dotnet nuget push **/*.nupkg --no-symbols --skip-duplicate
+      env:
+        NUGET_AUTH_TOKEN: ${{ secrets.NUGET_PACKAGE_TOKEN }}
